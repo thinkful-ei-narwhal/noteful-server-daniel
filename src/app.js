@@ -4,9 +4,11 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
-const Service = require('./service');
+const noteService = require('./noteService');
+const folderService = require('./folderService');
 const logger = require('./logger');
-const Router = require('./router');
+const noteRouter = require('./noteRouter');
+const folderRouter = require('./folderRouter');
 const { NODE_ENV, API_TOKEN } = require('./config');
 
 
@@ -41,7 +43,8 @@ app.use(function requireAuth(req, res, next) {
 
 // server requests
 
-app.use('/api', Router);
+app.use('/api/note', noteRouter);
+app.use('/api/folder', folderRouter);
 
 // errorHandler middleware
 
