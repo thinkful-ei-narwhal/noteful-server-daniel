@@ -43,8 +43,8 @@ app.use(function requireAuth(req, res, next) {
 
 // server requests
 
-app.use('/api/note', noteRouter);
-app.use('/api/folder', folderRouter);
+app.use('/api/notes', noteRouter);
+app.use('/api/folders', folderRouter);
 
 // errorHandler middleware
 

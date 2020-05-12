@@ -17,9 +17,9 @@ folderRouter
     folderService.getAllFolders(req.app.get('db'))
       .then(folders => res.json(folders.map(folder => sanitize(folder))));
   })
-  .post(dataParser, (req,res) =>{
+  .post(dataParser, (req, res, next) =>{
     const { folder_name } = req.body;
-    const id = uuid();
+    
 
     if (!folder_name) {
       logger.error('Failed post : User didn\'t supply folder name');
@@ -27,13 +27,15 @@ folderRouter
     }
 
     const newFolder = {
-      id,
       folder_name
     };
 
-    folderService.insertFolder(req.app.get('db', newFolder));
-    logger.info(`Successful post : Folder ${folder_name} was added with id: ${id}`);
-    res.status(201).json(sanitize(newFolder));
+    folderService.insertFolder(req.app.get('db') , newFolder)
+      .then(folder => {
+        logger.info(`Successful post : Folder ${folder_name} was added`);
+        res.status(201).json(sanitize(folder));
+      })
+      .catch(next);
   });
 
 folderRouter

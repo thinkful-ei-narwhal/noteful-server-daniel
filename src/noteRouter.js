@@ -1,5 +1,4 @@
 const express = require('express');
-const { v4: uuid } = require('uuid');
 const logger = require('./logger');
 const xss = require('xss');
 const noteRouter = express.Router();
@@ -9,7 +8,7 @@ const noteService = require('./noteService');
 const sanitize = item => ({
   id: item.id,
   modified: item.modified,
-  folderId: item.folderId,
+  folderid: item.folderid,
   note_name: xss(item.note_name),
   content: xss(item.content)
 });
@@ -20,26 +19,27 @@ noteRouter
     noteService.getAllNotes(req.app.get('db'))
       .then(notes => res.json(notes.map(note => sanitize(note))));
   })
-  .post(dataParser, (req,res) =>{
-    const { note_name, content, folderId } = req.body;
-    const id = uuid();
+  .post(dataParser, (req, res, next) =>{
+    const { note_name, content, folderid, modified} = req.body;
 
-    if (!note_name || !content || !folderId) {
+    if (!note_name || !content || !folderid || !modified) {
       logger.error('Failed post : User didn\'t supply note name or content');
       res.status(400).json({ error: 'Note Name and content is required' });
     }
 
     const newNote = {
-      id,
-      folderId,
-      modified: new Date(),
+      modified,
+      folderid,
       note_name,
       content
     };
 
-    noteService.insertNote(req.app.get('db', newNote));
-    logger.info(`Successful post : Note ${note_name} was added with id: ${id}`);
-    res.status(201).json(sanitize(newNote));
+    noteService.insertNote(req.app.get('db') , newNote)
+      .then(note => {
+        logger.info(`Successful post : Note ${note_name} was added`);
+        res.status(201).json(sanitize(note));
+      })
+      .catch(next);
   });
 
 noteRouter
@@ -76,8 +76,8 @@ noteRouter
       });
   })
   .patch(dataParser, (req, res, next) => {
-    const { note_name, content, folderId } = req.body;
-    const noteToUpdate = { note_name, content, folderId};
+    const { note_name, content, folderid } = req.body;
+    const noteToUpdate = { note_name, content, folderid};
     const id = req.params.id;
 
     const valNum = Object.values(noteToUpdate).filter(Boolean).length;
