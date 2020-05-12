@@ -14,7 +14,7 @@ describe('All Endpoints for ____', () => {
   before(() => {
     testDB = knex({
       client: 'pg',
-      connection: process.env.DB_TEST_URL
+      connection: process.env.TEST_DATABASE_URL
     });
   });
   before(() => app.set('db', testDB));
