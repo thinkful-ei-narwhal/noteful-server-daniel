@@ -56,7 +56,7 @@ noteRouter
           });
         }
         logger.info(
-          `Successful get : folder ${note.note_name} was retrieved with id: ${folder.id}`
+          `Successful get : folder ${note.note_name} was retrieved with id: ${note.id}`
         );
         res.note = note;
         next();
@@ -67,13 +67,14 @@ noteRouter
     res.json(sanitize(res.note));
   })
   .delete((req, res, next) => {
-    noteService.deleteNote(req.app.get('db', res.note.id))
+    noteService.deleteNote(req.app.get('db'), req.params.id)
       .then(() => {
         logger.info(
           'Successful delete: Note was deleted'
         );
         res.status(204).end();
-      });
+      })
+      .catch(next);
   })
   .patch(dataParser, (req, res, next) => {
     const { note_name, content, folderid } = req.body;
@@ -90,7 +91,7 @@ noteRouter
 
     noteService.updateNote(req.app.get('db', id, noteToUpdate))
       .then(() => {
-        res.status(204).end();
+        res.status(204);
       })
       .catch(next);
   });

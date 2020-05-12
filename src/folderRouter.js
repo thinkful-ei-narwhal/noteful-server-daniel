@@ -63,7 +63,7 @@ folderRouter
     res.json(sanitize(res.folder));
   })
   .delete((req, res, next) => {
-    folderService.deleteFolder(req.app.get('db', res.folder.id))
+    folderService.deleteFolder(req.app.get('db'), req.params.id)
       .then(() => {
         logger.info(
           'Successful delete: Folder was deleted'
